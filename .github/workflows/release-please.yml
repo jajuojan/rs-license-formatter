@@ -1,0 +1,49 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-please:
+    runs-on: windows-latest
+    steps:
+      - name: Run release-please
+        uses: GoogleCloudPlatform/release-please-action@v3.2.5
+        id: release_please
+        with:
+          release-type: rust
+          package-name: rs-license-formatter
+          pull-request-title-pattern: 'chore: release${component} ${version}'
+
+      - name: RELEASE - Checkout code
+        uses: actions/checkout@v3
+        if: ${{ steps.release_please.outputs.release_created }}
+
+      - name: RELEASE - Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+        if: ${{ steps.release_please.outputs.release_created }}
+
+      - name: RELEASE - Cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --locked --release
+        if: ${{ steps.release_please.outputs.release_created }}
+
+      - name: RELEASE - Upload release asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release_please.outputs.upload_url }}
+          asset_path: target/release/rs-license-formatter.exe
+          asset_name: rs-license-formatter.exe
+          asset_content_type: application/octet-stream
+        if: ${{ steps.release_please.outputs.release_created }}

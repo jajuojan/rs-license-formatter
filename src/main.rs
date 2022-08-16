@@ -2,7 +2,6 @@ use writers::MdWriter;
 
 //use crate::structs;
 mod reader;
-mod structs;
 mod writers;
 use clap::Parser;
 

@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: clippy
+
+      - name: Run Clippy
+        # uses: actions-rs/clippy-check@v1
+        uses: ErichDonGubler/clippy-check@6723b97308d5e57f643a52398b9e5121813b5834
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
