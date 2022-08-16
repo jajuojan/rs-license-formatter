@@ -1,4 +1,4 @@
-name: ci
+name: "Ensure formatting"
 
 on:
   pull_request:
