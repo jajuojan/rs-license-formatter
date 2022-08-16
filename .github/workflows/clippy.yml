@@ -11,7 +11,7 @@ env:
 jobs:
   clippy:
     name: Clippy
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,8 +25,7 @@ jobs:
           components: clippy
 
       - name: Run Clippy
-        # uses: actions-rs/clippy-check@v1
-        uses: ErichDonGubler/clippy-check@6723b97308d5e57f643a52398b9e5121813b5834
+        uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
