@@ -1,0 +1,20 @@
+[package]
+name = "rs-license-formatter"
+version = "0.1.0"
+authors = ["Jani Ojanen <jajuojan@gmail.com>"]
+edition = "2021"
+readme = "README.md"
+description=""
+repository = "https://github.com/jajuojan/rs-license-formatter"
+license = "MIT"
+
+[dependencies]
+clap = { version = "3.1.18", features = ["derive"] }
+regex = "1.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
