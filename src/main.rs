@@ -1,10 +1,12 @@
-use writers::MdWriter;
+use readers::yaml_reader;
+use writers::md_writer::MdConfig;
+use writers::md_writer::MdWriter;
 
-mod reader;
+mod readers;
 mod writers;
 use clap::Parser;
 
-use crate::writers::MdConfig;
+//use crate::writers::md_writer::MdConfig;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -15,7 +17,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let deserialized = reader::read_from_file(&args.input_file);
+    let deserialized = yaml_reader::read_from_file(&args.input_file);
     // TODO: Fill from args
     let config = MdConfig {
         fail_on_missing_licenses: false,

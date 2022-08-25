@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::reader;
+use crate::readers;
 
 #[derive(Clone)]
 struct MdLicense {
@@ -63,7 +63,7 @@ fn format_license_header(package: &str, license: &str) -> String {
     format!("{} ({})", license, package)
 }
 
-fn to_md_item(input: &reader::Library) -> MdItem {
+fn to_md_item(input: &readers::yaml_reader::Library) -> MdItem {
     let mut licenses: Vec<MdLicense> = Vec::new();
     for lic in &input.licenses {
         licenses.push(MdLicense {
@@ -85,7 +85,7 @@ fn to_md_item(input: &reader::Library) -> MdItem {
     }
 }
 
-fn into_md_items(input: &reader::ThirdParty) -> Vec<MdItem> {
+fn into_md_items(input: &readers::yaml_reader::ThirdParty) -> Vec<MdItem> {
     input
         .third_party_libraries
         .iter()
@@ -130,7 +130,7 @@ fn format_toc_license_name(i: &MdItem) -> String {
 }
 
 impl MdWriter {
-    pub fn new(input: &reader::ThirdParty, md_config: MdConfig) -> Self {
+    pub fn new(input: &readers::yaml_reader::ThirdParty, md_config: MdConfig) -> Self {
         let license_texts: Vec<String> = [].to_vec();
         let writer_items = into_md_items(input)
             .iter()
