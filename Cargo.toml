@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Jani Ojanen <jajuojan@gmail.com>"]
 edition = "2021"
 readme = "README.md"
-description=""
+description = ""
 repository = "https://github.com/jajuojan/rs-license-formatter"
 license = "MIT"
 

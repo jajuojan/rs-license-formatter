@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::reader;
+use crate::converter::{Package, PackageCollection};
 
 #[derive(Clone)]
 struct MdLicense {
@@ -8,6 +8,7 @@ struct MdLicense {
     text: Option<String>,
     link_anchor: Option<String>,
 }
+#[derive(Clone)]
 struct MdItem {
     package_name: String,
     copyright_note: Option<String>,
@@ -18,20 +19,35 @@ pub struct MdConfig {
     pub fail_on_missing_licenses: bool,
     pub join_similar_licenses: bool,
 }
+pub struct MdWriterItem {
+    md_item: MdItem,
+    license_text_ref: String,
+}
 
 pub struct MdWriter {
-    md_items: Vec<MdItem>,
+    writer_items: Vec<MdWriterItem>,
     md_config: MdConfig,
+    license_texts: Vec<String>,
+}
+
+impl MdWriterItem {
+    fn from(md_item: &MdItem) -> Self {
+        MdWriterItem {
+            md_item: md_item.to_owned(),
+            license_text_ref: String::new(),
+        }
+    }
 }
 
 fn guess_copyright_note(licenses: &Vec<MdLicense>) -> Option<String> {
-    let a: Vec<&MdLicense> = licenses.iter().filter(|l| l.license == "MIT").collect();
-    if a.len() != 1 || a[0].text.is_none() {
+    let mit_licenses: Vec<&MdLicense> = licenses.iter().filter(|l| l.license == "MIT").collect();
+    if mit_licenses.len() != 1 || mit_licenses[0].text.is_none() {
         return None;
     }
 
+    // TODO: use lazy_static for RegExp?
     let re = Regex::new(r"Copyright \(c\)").unwrap();
-    let license_text = a[0].to_owned().text.unwrap();
+    let license_text = mit_licenses[0].to_owned().text.unwrap();
     let copyright_line: Vec<&str> = license_text
         .split("\n")
         .filter(|t| re.is_match(t))
@@ -47,12 +63,12 @@ fn format_license_header(package: &str, license: &str) -> String {
     format!("{} ({})", license, package)
 }
 
-fn to_md_item(input: &reader::Library) -> MdItem {
+fn to_md_item(package: &Package) -> MdItem {
     let mut licenses: Vec<MdLicense> = Vec::new();
-    for lic in &input.licenses {
+    for lic in &package.licenses {
         licenses.push(MdLicense {
             license: lic.license.to_owned(),
-            link_anchor: Some(format_license_header(&input.package_name, &lic.license)),
+            link_anchor: Some(format_license_header(&package.name, &lic.license)),
             text: if lic.text == "NOT FOUND" {
                 None
             } else {
@@ -62,18 +78,18 @@ fn to_md_item(input: &reader::Library) -> MdItem {
     }
 
     MdItem {
-        package_name: input.package_name.to_owned(),
+        package_name: package.name.to_owned(),
         copyright_note: guess_copyright_note(&licenses),
         link_to_project: None, // TODO: implement
-        licenses: licenses,
+        licenses,
     }
 }
 
-fn into_md_items(input: &reader::ThirdParty) -> Vec<MdItem> {
+fn into_md_items(input: &PackageCollection) -> Vec<MdItem> {
     input
-        .third_party_libraries
+        .packages
         .iter()
-        .map(|library| to_md_item(library))
+        .map(|package| to_md_item(package))
         .collect()
 }
 
@@ -114,32 +130,42 @@ fn format_toc_license_name(i: &MdItem) -> String {
 }
 
 impl MdWriter {
-    pub fn new(input: &reader::ThirdParty, md_config: MdConfig) -> Self {
+    pub fn new(input: &PackageCollection, md_config: MdConfig) -> Self {
+        let license_texts: Vec<String> = [].to_vec();
+        let writer_items = into_md_items(input)
+            .iter()
+            .map(|i| MdWriterItem::from(i))
+            .collect();
         Self {
-            md_items: into_md_items(input),
+            writer_items,
             md_config,
+            license_texts,
         }
     }
 
     pub fn create_toc(&self) -> String {
         let mut output = "| Library Name | License | Authors |\n|-|-|-|\n".to_string();
-        for md_item in &self.md_items {
-            let name = format_toc_package_name(&md_item);
-            let license = format_toc_license_name(&md_item);
+        for writer_item in &self.writer_items {
+            let name = format_toc_package_name(&writer_item.md_item);
+            let license = format_toc_license_name(&writer_item.md_item);
             output += &format!(
                 "| {} | {} | {} |\n",
                 name,
                 license,
-                md_item.copyright_note.to_owned().unwrap_or("".to_string())
+                writer_item
+                    .md_item
+                    .copyright_note
+                    .to_owned()
+                    .unwrap_or("".to_string())
             );
         }
         output
     }
 
-    pub fn create_licenses_list(&self) -> String {
+    pub fn create_license_texts_list(&self) -> String {
         let mut output = "# Licenses of Third-Party Libraries\n".to_string();
-        for md_item in &self.md_items {
-            for license in &md_item.licenses {
+        for writer_item in &self.writer_items {
+            for license in &writer_item.md_item.licenses {
                 output += &format!(
                     "\n## {}\n\n```\n{}```\n",
                     license
