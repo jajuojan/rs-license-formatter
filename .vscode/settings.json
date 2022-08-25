@@ -3,4 +3,9 @@
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
   },
+  "github.copilot.enable": {
+    "*": false,
+    "python": false,
+    "rust":true
+  },
 }
