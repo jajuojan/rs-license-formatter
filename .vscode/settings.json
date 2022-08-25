@@ -3,4 +3,14 @@
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
   },
+  "github.copilot.enable": {
+    "*": false,
+    "rust": true
+  },
+  "[toml]": {
+    "editor.formatOnSave": true,
+  },
+  "evenBetterToml.formatter.trailingNewline": true,
+  "evenBetterToml.formatter.reorderKeys": true,
+  "evenBetterToml.formatter.alignEntries": true,
 }
