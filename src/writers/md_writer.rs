@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::reader;
+use crate::converter::{Package, PackageCollection};
 
 #[derive(Clone)]
 struct MdLicense {
@@ -63,12 +63,12 @@ fn format_license_header(package: &str, license: &str) -> String {
     format!("{} ({})", license, package)
 }
 
-fn to_md_item(input: &reader::Library) -> MdItem {
+fn to_md_item(package: &Package) -> MdItem {
     let mut licenses: Vec<MdLicense> = Vec::new();
-    for lic in &input.licenses {
+    for lic in &package.licenses {
         licenses.push(MdLicense {
             license: lic.license.to_owned(),
-            link_anchor: Some(format_license_header(&input.package_name, &lic.license)),
+            link_anchor: Some(format_license_header(&package.name, &lic.license)),
             text: if lic.text == "NOT FOUND" {
                 None
             } else {
@@ -78,18 +78,18 @@ fn to_md_item(input: &reader::Library) -> MdItem {
     }
 
     MdItem {
-        package_name: input.package_name.to_owned(),
+        package_name: package.name.to_owned(),
         copyright_note: guess_copyright_note(&licenses),
         link_to_project: None, // TODO: implement
         licenses,
     }
 }
 
-fn into_md_items(input: &reader::ThirdParty) -> Vec<MdItem> {
+fn into_md_items(input: &PackageCollection) -> Vec<MdItem> {
     input
-        .third_party_libraries
+        .packages
         .iter()
-        .map(|library| to_md_item(library))
+        .map(|package| to_md_item(package))
         .collect()
 }
 
@@ -130,7 +130,7 @@ fn format_toc_license_name(i: &MdItem) -> String {
 }
 
 impl MdWriter {
-    pub fn new(input: &reader::ThirdParty, md_config: MdConfig) -> Self {
+    pub fn new(input: &PackageCollection, md_config: MdConfig) -> Self {
         let license_texts: Vec<String> = [].to_vec();
         let writer_items = into_md_items(input)
             .iter()

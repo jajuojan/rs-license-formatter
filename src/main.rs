@@ -1,10 +1,10 @@
-use writers::MdWriter;
-
-mod reader;
-mod writers;
 use clap::Parser;
-
-use crate::writers::MdConfig;
+use converter::PackageCollection;
+use readers::yaml_reader;
+use writers::md_writer::{MdConfig, MdWriter};
+mod converter;
+mod readers;
+mod writers;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -15,13 +15,16 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let deserialized = reader::read_from_file(&args.input_file);
     // TODO: Fill from args
     let config = MdConfig {
         fail_on_missing_licenses: false,
         join_similar_licenses: false,
     };
-    let writer = MdWriter::new(&deserialized, config);
+
+    let deserialized = yaml_reader::read_from_file(&args.input_file);
+    //println!("{:?}", deserialized);
+    let packages = PackageCollection::from_third_party(&deserialized);
+    let writer = MdWriter::new(&packages, config);
 
     let toc = writer.create_toc();
     let licenses = writer.create_license_texts_list();
