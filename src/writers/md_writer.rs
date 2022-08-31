@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use regex::Regex;
 
 use crate::converter::{Package, PackageCollection};
@@ -15,13 +17,14 @@ struct MdItem {
     link_to_project: Option<String>,
     licenses: Vec<MdLicense>,
 }
+
 pub struct MdConfig {
     pub fail_on_missing_licenses: bool,
     pub join_similar_licenses: bool,
 }
 pub struct MdWriterItem {
-    md_item: MdItem,
-    license_text_ref: String,
+    //md_item: MdItem,
+    package: Rc<Package>,
 }
 
 pub struct MdWriter {
@@ -31,11 +34,8 @@ pub struct MdWriter {
 }
 
 impl MdWriterItem {
-    fn from(md_item: &MdItem) -> Self {
-        MdWriterItem {
-            md_item: md_item.to_owned(),
-            license_text_ref: String::new(),
-        }
+    fn from(package: Rc<Package>) -> Self {
+        MdWriterItem { package }
     }
 }
 
@@ -101,21 +101,22 @@ fn to_name_or_link(first: &str, second: &Option<String>) -> String {
     }
 }
 
-fn format_toc_package_name(i: &MdItem) -> String {
-    to_name_or_link(&i.package_name, &i.link_to_project)
+fn format_toc_package_name(item: &MdItem) -> String {
+    to_name_or_link(&item.package_name, &item.link_to_project)
 }
 
-fn format_toc_license_name(i: &MdItem) -> String {
-    let mut license = "".to_string();
-    for (pos, lic) in i.licenses.iter().enumerate() {
+fn format_toc_license_name(item: &MdItem) -> String {
+    let mut license_name = "".to_string();
+    for (pos, license) in item.licenses.iter().enumerate() {
         if pos > 0 {
-            license += "/";
+            license_name += "/";
         }
-        let mut anchor = lic.link_anchor.to_owned();
-        if lic.link_anchor.is_some() {
+        let mut anchor = license.link_anchor.to_owned();
+        if license.link_anchor.is_some() {
             anchor = Some(format!(
                 "#{}",
-                &lic.link_anchor
+                &license
+                    .link_anchor
                     .to_owned()
                     .unwrap()
                     .replace(" ", "-")
@@ -124,17 +125,19 @@ fn format_toc_license_name(i: &MdItem) -> String {
                     .replace(".", "")
             ));
         }
-        license += &to_name_or_link(&lic.license, &anchor);
+        license_name += &to_name_or_link(&license.license, &anchor);
     }
-    license
+    license_name
 }
 
 impl MdWriter {
     pub fn new(input: &PackageCollection, md_config: MdConfig) -> Self {
         let license_texts: Vec<String> = [].to_vec();
-        let writer_items = into_md_items(input)
+        let writer_items = //into_md_items(input)
+            input
+            .packages
             .iter()
-            .map(|i| MdWriterItem::from(i))
+            .map(|i| MdWriterItem::from(Rc::new(*i)))
             .collect();
         Self {
             writer_items,
