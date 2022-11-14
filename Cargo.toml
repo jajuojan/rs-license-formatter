@@ -9,7 +9,7 @@ repository = "https://github.com/jajuojan/rs-license-formatter"
 license = "MIT"
 
 [dependencies]
-clap = { version = "3.1.18", features = ["derive"] }
+clap = { version = "4.0.23", features = ["derive"] }
 regex = "1.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
