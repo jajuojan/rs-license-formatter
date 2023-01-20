@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run release-please
-        uses: GoogleCloudPlatform/release-please-action@v3.7.1
+        uses: GoogleCloudPlatform/release-please-action@v3.7.3
         id: release_please
         with:
           release-type: rust
