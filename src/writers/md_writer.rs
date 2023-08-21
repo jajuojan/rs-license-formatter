@@ -192,18 +192,12 @@ impl MdWriter {
 #[cfg(test)]
 mod tests {
     use crate::converter::tests::package_collection_data;
-    use crate::writers::md_writer::{MdConfig, MdWriter};
+    use crate::writers::md_writer::MdWriter;
 
     #[test]
     fn test_create_toc() {
         let input = package_collection_data();
-        let writer = MdWriter::new(
-            &input,
-            MdConfig {
-                join_similar_licenses: false,
-                fail_on_missing_licenses: false,
-            },
-        );
+        let writer = MdWriter::new(&input);
         let toc = writer.create_toc();
         assert_eq!(
             toc,
