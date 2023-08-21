@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use converter::PackageCollection;
 use readers::yaml_reader;
 use writers::md_writer::MdWriter;
@@ -6,8 +6,20 @@ mod converter;
 mod readers;
 mod writers;
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+enum OutputChoice {
+    All,
+    TocOnly,
+    LicenseTextsOnly,
+}
+
 #[derive(Parser)]
-#[clap(author, version, about, long_about = None)]
+#[clap(
+    author,
+    version,
+    about,
+    long_about = "Convert third-party license-information from toml to markdown"
+)]
 struct Args {
     #[clap(help = "Location of yaml license-file")]
     input_file: String,
@@ -18,6 +30,15 @@ struct Args {
         help = "Fail on missing license-texts"
     )]
     fail_on_missing_licenses: bool,
+
+    #[clap(
+        short = 'o',
+        long = "output",
+        help = "Choose what to output",
+        value_enum,
+        default_value = "all"
+    )]
+    choice: Option<OutputChoice>,
 }
 
 fn main() {
@@ -31,10 +52,17 @@ fn main() {
         std::process::exit(1);
     }
 
-    //let config = MdConfig {};
-    let writer = MdWriter::new(&packages /* , config*/);
-    let toc = writer.create_toc();
-    let licenses = writer.create_license_texts_list();
+    let writer = MdWriter::new(&packages);
+    let mut toc: String = String::new();
+    let mut licenses: String = String::new();
+    if (args.choice == Some(OutputChoice::All)) || (args.choice == Some(OutputChoice::TocOnly)) {
+        toc = writer.create_toc();
+    }
+    if (args.choice == Some(OutputChoice::All))
+        || (args.choice == Some(OutputChoice::LicenseTextsOnly))
+    {
+        licenses = writer.create_license_texts_list();
+    }
 
     print!("{}\n{}", toc, licenses);
 }
