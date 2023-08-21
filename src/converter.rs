@@ -86,11 +86,11 @@ pub mod tests {
                     licenses: vec![
                         Rc::new(License {
                             license: "MIT".to_owned(),
-                            text: "Lots of text...".to_owned(),
+                            text: Some("Lots of text...".to_owned()),
                         }),
                         Rc::new(License {
                             license: "Apache-2.0".to_owned(),
-                            text: "Lots of text 2...".to_owned(),
+                            text: Some("Lots of text 2...".to_owned()),
                         }),
                     ],
                 },
@@ -100,22 +100,22 @@ pub mod tests {
                     license: "Apache-2.0".to_owned(),
                     licenses: vec![Rc::new(License {
                         license: "Apache-2.0".to_owned(),
-                        text: "Lots of text 2...".to_owned(),
+                        text: Some("Lots of text 2...".to_owned()),
                     })],
                 },
             ],
             licenses: vec![
                 Rc::new(License {
                     license: "MIT".to_owned(),
-                    text: "Lots of text...".to_owned(),
+                    text: Some("Lots of text...".to_owned()),
                 }),
                 Rc::new(License {
                     license: "Apache-2.0".to_owned(),
-                    text: "Lots of text 2...".to_owned(),
+                    text: Some("Lots of text 2...".to_owned()),
                 }),
                 Rc::new(License {
                     license: "Apache-2.0".to_owned(),
-                    text: "Lots of text 2...".to_owned(),
+                    text: Some("Lots of text 2...".to_owned()),
                 }),
             ],
         }
