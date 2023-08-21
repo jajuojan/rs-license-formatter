@@ -21,24 +21,24 @@ pub struct MdConfig {
 }
 pub struct MdWriterItem {
     md_item: MdItem,
-    license_text_ref: String,
 }
 
 pub struct MdWriter {
     writer_items: Vec<MdWriterItem>,
     md_config: MdConfig,
-    license_texts: Vec<String>,
 }
 
 impl MdWriterItem {
     fn from(md_item: &MdItem) -> Self {
         MdWriterItem {
             md_item: md_item.to_owned(),
-            license_text_ref: String::new(),
         }
     }
 }
 
+/// Attemp to guess the copyright note from the liense text.
+///
+/// This will only work for MIT licenses.
 fn guess_copyright_note(licenses: &Vec<MdLicense>) -> Option<String> {
     let mit_licenses: Vec<&MdLicense> = licenses.iter().filter(|l| l.license == "MIT").collect();
     if mit_licenses.len() != 1 || mit_licenses[0].text.is_none() {
@@ -59,10 +59,12 @@ fn guess_copyright_note(licenses: &Vec<MdLicense>) -> Option<String> {
     return None;
 }
 
+/// Format the license header for the markdown output
 fn format_license_header(package: &str, license: &str) -> String {
     format!("{} ({})", license, package)
 }
 
+/// Convert a package to a markdown item
 fn to_md_item(package: &Package) -> MdItem {
     let mut licenses: Vec<MdLicense> = Vec::new();
     for lic in &package.licenses {
@@ -85,6 +87,7 @@ fn to_md_item(package: &Package) -> MdItem {
     }
 }
 
+/// Convert a package collection to a vector of markdown items
 fn into_md_items(input: &PackageCollection) -> Vec<MdItem> {
     input
         .packages
@@ -93,6 +96,7 @@ fn into_md_items(input: &PackageCollection) -> Vec<MdItem> {
         .collect()
 }
 
+/// Format name and optional link as plain text or link
 fn to_name_or_link(first: &str, second: &Option<String>) -> String {
     if second.is_some() {
         format!("[{}]({})", &first, &second.to_owned().unwrap())
@@ -101,10 +105,12 @@ fn to_name_or_link(first: &str, second: &Option<String>) -> String {
     }
 }
 
+/// Format the package name for the table of contents
 fn format_toc_package_name(i: &MdItem) -> String {
     to_name_or_link(&i.package_name, &i.link_to_project)
 }
 
+/// Format the license name for the table of contents
 fn format_toc_license_name(i: &MdItem) -> String {
     let mut license = "".to_string();
     for (pos, lic) in i.licenses.iter().enumerate() {
@@ -129,9 +135,10 @@ fn format_toc_license_name(i: &MdItem) -> String {
     license
 }
 
+/// The writer for the markdown output
 impl MdWriter {
+    /// Create a new instance of the writer
     pub fn new(input: &PackageCollection, md_config: MdConfig) -> Self {
-        let license_texts: Vec<String> = [].to_vec();
         let writer_items = into_md_items(input)
             .iter()
             .map(|i| MdWriterItem::from(i))
@@ -139,10 +146,10 @@ impl MdWriter {
         Self {
             writer_items,
             md_config,
-            license_texts,
         }
     }
 
+    /// Create the text containing the table of contents and links to the license texts
     pub fn create_toc(&self) -> String {
         let mut output = "| Library Name | License | Authors |\n|-|-|-|\n".to_string();
         for writer_item in &self.writer_items {
@@ -162,6 +169,7 @@ impl MdWriter {
         output
     }
 
+    /// Create the text containing all the license-texts
     pub fn create_license_texts_list(&self) -> String {
         let mut output = "# Licenses of Third-Party Libraries\n".to_string();
         for writer_item in &self.writer_items {

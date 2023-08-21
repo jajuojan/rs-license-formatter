@@ -22,11 +22,11 @@ fn main() {
     };
 
     let deserialized = yaml_reader::read_from_file(&args.input_file);
-    //println!("{:?}", deserialized);
     let packages = PackageCollection::from_third_party(&deserialized);
-    let writer = MdWriter::new(&packages, config);
 
+    let writer = MdWriter::new(&packages, config);
     let toc = writer.create_toc();
     let licenses = writer.create_license_texts_list();
+    
     print!("{}\n{}", toc, licenses);
 }
