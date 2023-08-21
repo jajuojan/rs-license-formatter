@@ -15,7 +15,7 @@ pub struct Package {
 #[derive(Clone, Debug, PartialEq)]
 pub struct License {
     pub license: String,
-    pub text: String,
+    pub text: Option<String>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -34,7 +34,7 @@ impl PackageCollection {
             for lic in &library.licenses {
                 let license = Rc::new(License {
                     license: lic.license.to_owned(),
-                    text: lic.text.to_owned(),
+                    text: resolve_license_text(&lic.text),
                 });
                 package_licenses.push(Rc::clone(&license));
                 licenses.push(Rc::clone(&license));
@@ -48,6 +48,24 @@ impl PackageCollection {
             });
         }
         PackageCollection { packages, licenses }
+    }
+
+    pub(crate) fn has_missing_license_texts(&self) -> bool {
+        for package in &self.packages {
+            if package.licenses.iter().any(|l| l.text.is_none()) {
+                return true;
+            }
+        }
+
+        false
+    }
+}
+
+fn resolve_license_text(license_text: &String) -> Option<String> {
+    if license_text == "NOT FOUND" {
+        None
+    } else {
+        Some(license_text.to_owned())
     }
 }
 

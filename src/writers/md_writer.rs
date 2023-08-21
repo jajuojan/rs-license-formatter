@@ -8,6 +8,7 @@ struct MdLicense {
     text: Option<String>,
     link_anchor: Option<String>,
 }
+
 #[derive(Clone)]
 struct MdItem {
     package_name: String,
@@ -15,17 +16,17 @@ struct MdItem {
     link_to_project: Option<String>,
     licenses: Vec<MdLicense>,
 }
-pub struct MdConfig {
-    pub fail_on_missing_licenses: bool,
-    pub join_similar_licenses: bool,
-}
+
+#[allow(dead_code)]
+pub struct MdConfig {}
+
 pub struct MdWriterItem {
     md_item: MdItem,
 }
 
 pub struct MdWriter {
     writer_items: Vec<MdWriterItem>,
-    md_config: MdConfig,
+    //md_config: MdConfig,
 }
 
 impl MdWriterItem {
@@ -71,11 +72,7 @@ fn to_md_item(package: &Package) -> MdItem {
         licenses.push(MdLicense {
             license: lic.license.to_owned(),
             link_anchor: Some(format_license_header(&package.name, &lic.license)),
-            text: if lic.text == "NOT FOUND" {
-                None
-            } else {
-                Some(lic.text.to_owned())
-            },
+            text: lic.text.to_owned(),
         });
     }
 
@@ -138,14 +135,14 @@ fn format_toc_license_name(i: &MdItem) -> String {
 /// The writer for the markdown output
 impl MdWriter {
     /// Create a new instance of the writer
-    pub fn new(input: &PackageCollection, md_config: MdConfig) -> Self {
+    pub fn new(input: &PackageCollection /*, md_config: MdConfig*/) -> Self {
         let writer_items = into_md_items(input)
             .iter()
             .map(|i| MdWriterItem::from(i))
             .collect();
         Self {
             writer_items,
-            md_config,
+            //md_config,
         }
     }
 
