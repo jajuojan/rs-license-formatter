@@ -1,5 +1,5 @@
 use clap::{Parser, ValueEnum};
-use converter::PackageCollection;
+use converter::{Package, PackageCollection};
 use readers::yaml_reader;
 use writers::md_writer::MdWriter;
 mod converter;
@@ -41,16 +41,28 @@ struct Args {
     choice: Option<OutputChoice>,
 }
 
+fn decorate_with_crate_link(p: &mut Package) {
+    p.link = Some(format!(
+        "https://crates.io/crates/{}/{}/",
+        p.name, p.version
+    ));
+}
+
 fn main() {
     let args = Args::parse();
 
     let deserialized = yaml_reader::read_from_file(&args.input_file);
-    let packages = PackageCollection::from_third_party(&deserialized);
+    let mut packages = PackageCollection::from_third_party(&deserialized);
 
     if args.fail_on_missing_licenses && packages.has_missing_license_texts() {
         eprint!("Missing license-texts found");
         std::process::exit(1);
     }
+
+    packages
+        .packages
+        .iter_mut()
+        .for_each(|p| decorate_with_crate_link(p));
 
     let writer = MdWriter::new(&packages);
     let mut toc: String = String::new();

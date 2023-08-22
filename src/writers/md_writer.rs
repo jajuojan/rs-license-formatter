@@ -79,7 +79,7 @@ fn to_md_item(package: &Package) -> MdItem {
     MdItem {
         package_name: package.name.to_owned(),
         copyright_note: guess_copyright_note(&licenses),
-        link_to_project: None, // TODO: implement
+        link_to_project: package.link.to_owned(),
         licenses,
     }
 }
