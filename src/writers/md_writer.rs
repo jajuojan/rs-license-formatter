@@ -121,6 +121,7 @@ fn format_toc_license_name(i: &MdItem) -> String {
                 &lic.link_anchor
                     .to_owned()
                     .unwrap()
+                    .to_lowercase()
                     .replace(" ", "-")
                     .replace("(", "")
                     .replace(")", "")
