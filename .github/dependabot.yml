@@ -15,6 +15,10 @@ updates:
       - "dependencies"
       - "github_actions"
       - "bot"
+    groups:
+      cargo-deps:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -26,3 +30,7 @@ updates:
       - "dependencies"
       - "github_actions"
       - "bot"
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
