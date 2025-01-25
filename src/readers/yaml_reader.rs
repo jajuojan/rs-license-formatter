@@ -23,7 +23,7 @@ pub struct ThirdParty {
 
 pub fn read_from_file(file_name: &str) -> ThirdParty {
     let file = fs::File::open(file_name).expect(&format!("Unable to read file: {}", file_name));
-    let deserialized: ThirdParty = serde_yaml::from_reader(file).expect(&format!(
+    let deserialized: ThirdParty = serde_yml::from_reader(file).expect(&format!(
         "Unable to deserialize file contents from {}",
         file_name
     ));
