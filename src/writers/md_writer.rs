@@ -202,7 +202,7 @@ mod tests {
         let toc = writer.create_toc();
         assert_eq!(
             toc,
-            "| Library Name | License | Authors |\n|-|-|-|\n| my_dependency | [MIT](#MIT-my_dependency)/[Apache-2.0](#Apache-20-my_dependency) |  |\n| my_other_dependency | [Apache-2.0](#Apache-20-my_other_dependency) |  |\n"
+            "| Library Name | License | Authors |\n|-|-|-|\n| my_dependency | [MIT](#mit-my_dependency)/[Apache-2.0](#apache-20-my_dependency) |  |\n| my_other_dependency | [Apache-2.0](#apache-20-my_other_dependency) |  |\n"
         );
     }
 }
