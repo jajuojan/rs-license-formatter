@@ -40,7 +40,7 @@ impl MdWriterItem {
 /// Attemp to guess the copyright note from the liense text.
 ///
 /// This will only work for MIT licenses.
-fn guess_copyright_note(licenses: &Vec<MdLicense>) -> Option<String> {
+fn guess_copyright_note(licenses: &[MdLicense]) -> Option<String> {
     let mit_licenses: Vec<&MdLicense> = licenses.iter().filter(|l| l.license == "MIT").collect();
     if mit_licenses.len() != 1 || mit_licenses[0].text.is_none() {
         return None;
@@ -48,7 +48,7 @@ fn guess_copyright_note(licenses: &Vec<MdLicense>) -> Option<String> {
 
     // TODO: use lazy_static for RegExp?
     let re = Regex::new(r"Copyright \(c\)").unwrap();
-    let license_text = mit_licenses[0].to_owned().text.unwrap();
+    let license_text = mit_licenses[0].text.as_ref().unwrap().to_string();
     let copyright_line: Vec<&str> = license_text
         .split("\n")
         .filter(|t| re.is_match(t))
@@ -96,7 +96,7 @@ fn into_md_items(input: &PackageCollection) -> Vec<MdItem> {
 /// Format name and optional link as plain text or link
 fn to_name_or_link(first: &str, second: &Option<String>) -> String {
     if second.is_some() {
-        format!("[{}]({})", &first, &second.to_owned().unwrap())
+        format!("[{}]({})", &first, &second.as_ref().unwrap())
     } else {
         format!("{}", &first)
     }
@@ -118,8 +118,8 @@ fn format_toc_license_name(i: &MdItem) -> String {
         if lic.link_anchor.is_some() {
             anchor = Some(format!(
                 "#{}",
-                &lic.link_anchor
-                    .to_owned()
+                lic.link_anchor
+                    .as_ref()
                     .unwrap()
                     .to_lowercase()
                     .replace(" ", "-")
