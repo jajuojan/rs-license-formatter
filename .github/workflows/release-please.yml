@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run release-please
-        uses: GoogleCloudPlatform/release-please-action@v3.7.8
+        uses: GoogleCloudPlatform/release-please-action@v4.1.3
         id: release_please
         with:
           release-type: rust
@@ -18,7 +18,7 @@ jobs:
           pull-request-title-pattern: 'chore: release${component} ${version}'
 
       - name: RELEASE - Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: ${{ steps.release_please.outputs.release_created }}
 
       - name: RELEASE - Install Rust toolchain
